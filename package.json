@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "vite": "^4.4.5",
     "@babel/core": "^7.21.4",
     "@babel/plugin-syntax-flow": "^7.21.4",
     "@babel/plugin-transform-react-jsx": "^7.21.0",
@@ -11,6 +10,7 @@
     "@emotion/styled": "^11.10.6",
     "@mui/material": "^5.12.1",
     "@reduxjs/toolkit": "^1.9.5",
+    "@svgr/core": "^8.1.0",
     "@testing-library/dom": "^9.2.0",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
@@ -19,6 +19,7 @@
     "@types/node": "^16.18.24",
     "@types/react": "^18.0.37",
     "@types/react-dom": "^18.0.11",
+    "@vitejs/plugin-react": "^4.3.4",
     "allotment": "^1.19.0",
     "konva": "^9.0.1",
     "ml-matrix": "^6.10.4",
@@ -29,6 +30,8 @@
     "react-redux": "^8.1.1",
     "react-scripts": "5.0.1",
     "typescript": "^4.9.5",
+    "vite": "^4.4.5",
+    "vite-plugin-html": "^3.2.2",
     "web-vitals": "^2.1.4"
   },
   "scripts": {

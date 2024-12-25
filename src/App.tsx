@@ -1,6 +1,7 @@
 import CssModule from "./index.module.css";
 import React, {useEffect, useRef, useState} from "react";
 import {ClipControl, IClipControlProps, IClipControlRef, RegionData} from "./ClipControl/ClipControl";
+import {DivClipControl, IDivClipControlProps, IDivClipControlRef} from "./ClipControl/DivClipControl";
 import { Allotment } from 'allotment'
 import "allotment/dist/style.css";
 import {useAppDispatch, useAppSelector} from "./store/hooks";
@@ -14,16 +15,12 @@ const App = () => {
     const [showClipControl, setShowClipControl] = useState(false)
     const clipControlRef = useRef<IClipControlRef>(null)
     const liveWindowContainerRef = useRef<HTMLDivElement>(null)
+    const clipControlCanvasRef = useRef<HTMLCanvasElement>(null)
+    const liveWindowRef = useRef<HTMLCanvasElement>(null)
+
     useEffect(() => {
-        clipControlRef.current?.updateCanvasInfo(
-            liveWindowContainerRef.current?.clientWidth as number,
-            liveWindowContainerRef.current?.clientHeight as number,
-            liveWindowContainerRef.current?.getBoundingClientRect().x as number,
-            liveWindowContainerRef.current?.getBoundingClientRect().y as number,
-        )
         setShowClipControl(true)
-        console.log("window.screen.width", window.screen.width, "window.screen.height", window.screen.height)
-    }, [liveWindowContainerRef.current])
+    }, [])
 
     const doRotate = () => {
 
@@ -70,6 +67,9 @@ const App = () => {
             liveWindowContainerY,
         )
 
+        // console.log("window.screen.width", window.screen.width, "window.screen.height", window.screen.height)
+        console.log("liveWindowContainer width", liveWindowContainerWidth, "liveWindowContainer height", liveWindowContainerHeight)
+
         if (clipControlProps == null) {
             // todo: position and size should modify according to clip type: video, sticker, caption, etc.
             let props: IClipControlProps = {
@@ -95,22 +95,18 @@ const App = () => {
     }
 
     useEffect(() => {
-        updateClipControlRectInfo()
-        console.log("useEffect", clipControlProps)
+        setTimeout(() => {
+            updateClipControlRectInfo()
+        }, 1)
+    }, [showClipControl])
+
+    useEffect(() => {
         if (clipControlProps) {
             clipControlRef.current?.updateProps(clipControlProps)
             clipControlRef.current?.redraw()
         }
-    }, [showClipControl, clipControlProps])
+    }, [clipControlProps]);
 
-
-    useEffect(() => {
-        updateClipControlRectInfo()
-        setShowClipControl(true)
-    }, [])
-
-    const clipControlCanvasRef = useRef<HTMLCanvasElement>(null)
-    const liveWindowRef = useRef<HTMLCanvasElement>(null)
     return (
         <>
             <Allotment defaultSizes={[window.screen.width * 0.22, window.screen.width]}>
@@ -135,7 +131,7 @@ const App = () => {
                                                 id="clipControlHitCanvas"
                                                 className={CssModule.clipControlHitCanvas}
                                             ></canvas>
-                                            <ClipControl
+                                            {clipControlProps ? (<DivClipControl
                                                 x={clipControlProps!.x}
                                                 y={clipControlProps!.y}
                                                 width={clipControlProps!.width}
@@ -153,7 +149,7 @@ const App = () => {
                                                 doTransform={doClipControlTransform}
                                                 canvasId={"clipControlCanvas"}
                                                 hitCanvasId={"clipControlHitCanvas"}
-                                            />
+                                            />) : null}
                                         </>
 
                                     ) : null

@@ -1,4 +1,4 @@
-import {Matrix} from "ml-matrix";
+import { Matrix } from 'ml-matrix'
 
 export const drawRect = (
     x: number,
@@ -56,11 +56,14 @@ export const drawRect2 = (
     }
 }
 
-export const drawRect3 = (points: Matrix[], lineWidth: number,
-                          strokeStyle: string,
-                          fill: boolean,
-                          fillStyle: string,
-                          ctx: CanvasRenderingContext2D) => {
+export const drawRect3 = (
+    points: Matrix[],
+    lineWidth: number,
+    strokeStyle: string,
+    fill: boolean,
+    fillStyle: string,
+    ctx: CanvasRenderingContext2D,
+) => {
     if (points.length < 2) {
         return
     }
@@ -132,7 +135,7 @@ export function getRandomColor() {
 
 export function setColorHash(rects: Rect[], colorsHash: Map<string, Rect>) {
     rects.forEach(rect => {
-        for (; ;) {
+        for (;;) {
             const colorKey = getRandomColor()
             if (!colorsHash.get(colorKey)) {
                 rect.colorKey = colorKey
@@ -195,11 +198,13 @@ export const rotatePath =
     'M11.2882 9.02352C10.9957 9.93919 10.4282 10.6167 9.58558 11.0561C8.74299 11.4955 7.86522 11.5694 6.95226 11.2778L6.62168 11.1722L7.00293 11.9113C7.04282 11.9886 7.04928 12.0719 7.02229 12.1611C6.9953 12.2503 6.94135 12.3157 6.86043 12.3575C6.7795 12.3992 6.69534 12.4061 6.60795 12.3782C6.52056 12.3503 6.456 12.2959 6.41426 12.215L5.69557 10.8217C5.64348 10.7207 5.63373 10.6192 5.66632 10.5172C5.69892 10.4151 5.7657 10.3381 5.86668 10.286L7.25995 9.56727C7.33729 9.52737 7.42055 9.52092 7.50973 9.54791C7.59891 9.57489 7.66437 9.62885 7.70611 9.70978C7.74785 9.7907 7.75477 9.87486 7.72686 9.96224C7.69895 10.0496 7.64453 10.1142 7.56361 10.1559L6.82451 10.5372L7.15509 10.6428C7.89057 10.8777 8.59815 10.8184 9.27783 10.4648C9.95752 10.1113 10.416 9.56321 10.6531 8.82068C10.6927 8.69692 10.7236 8.57089 10.7461 8.44257C10.7685 8.31425 10.7785 8.18389 10.7759 8.05148C10.7775 7.95271 10.8076 7.86854 10.866 7.79897C10.9244 7.7294 10.9993 7.6871 11.0909 7.67207C11.1867 7.65843 11.2702 7.68225 11.3413 7.74352C11.4123 7.80479 11.447 7.88482 11.4454 7.98359C11.4508 8.16119 11.4393 8.33726 11.4108 8.51178C11.3823 8.68631 11.3414 8.85689 11.2882 9.02352ZM5.34742 7.17266C5.30789 7.29642 5.27691 7.42246 5.25447 7.55077C5.23203 7.67909 5.2221 7.80945 5.22466 7.94187C5.22302 8.04063 5.19265 8.12589 5.13354 8.19763C5.07444 8.26937 4.99912 8.31275 4.9076 8.32778C4.81606 8.34281 4.73456 8.32037 4.66308 8.26045C4.5916 8.20053 4.55598 8.12336 4.55623 8.02894C4.55214 7.84698 4.56349 7.66772 4.59028 7.49114C4.61707 7.31458 4.65777 7.1408 4.71239 6.96982C5.00486 6.05415 5.57239 5.37661 6.41497 4.93722C7.25755 4.49783 8.13533 4.42394 9.04829 4.71554L9.37887 4.82113L8.99762 4.08204C8.95772 4.0047 8.95127 3.92144 8.97825 3.83226C9.00524 3.74309 9.0592 3.67763 9.14012 3.63589C9.22105 3.59414 9.30521 3.58722 9.3926 3.61513C9.47998 3.64304 9.54454 3.69746 9.58628 3.77839L10.305 5.17167C10.3571 5.27264 10.3668 5.37415 10.3342 5.47619C10.3016 5.57823 10.2348 5.6553 10.1339 5.70738L8.74059 6.42608C8.66325 6.46598 8.57999 6.47243 8.49081 6.44544C8.40163 6.41846 8.33617 6.3645 8.29443 6.28357C8.25269 6.20265 8.24577 6.1185 8.27368 6.03111C8.3016 5.94373 8.35601 5.87916 8.43694 5.83742L9.17603 5.45617L8.84545 5.35058C8.10998 5.11567 7.4024 5.17498 6.72271 5.52853C6.04302 5.88209 5.58459 6.43013 5.34742 7.17266Z'
 export const rotateAnchorOffset = 20
 
+export const menuIdBack = 'back'
 export const menuIdCrop = 'crop'
 export const menuIdPinp = 'pinp'
 export const menuIdFlipHorizontal = 'flipHorizontal'
 export const menuIdFlipVertical = 'flipVertical'
-export const menuIdBack = 'back'
+export const menuIdPinpBack = 'pinpBack'
+export const menuIdCropBack = 'cropBack'
 export const menuIdDone = 'done'
 export const menuIdPinpLeftTop = 'pinpLeftTop'
 export const menuIdPinpRightTop = 'pinpRightTop'
@@ -217,24 +222,27 @@ export const anchorIdBottomCenter = 'bottomCenter'
 export const anchorIdLeftCenter = 'leftCenter'
 export const anchorIdRightCenter = 'rightCenter'
 export const anchorIdRotation = 'rotation'
-
+export const anchorIdScaleRect1 = 'scaleRect1'
+export const anchorIdScaleRect2 = 'scaleRect2'
+export const anchorIdScaleRect3 = 'scaleRect3'
+export const anchorIdScaleRect4 = 'scaleRect4'
 
 export const clipMenuPaths = [
-    {path: cropPath, id: menuIdCrop},
-    {path: pinpPath, id: menuIdPinp},
-    {path: flipHorizontal, id: menuIdFlipHorizontal},
-    {path: flipVertical, id: menuIdFlipVertical}
+    { path: cropPath, id: menuIdCrop },
+    { path: pinpPath, id: menuIdPinp },
+    { path: flipHorizontal, id: menuIdFlipHorizontal },
+    { path: flipVertical, id: menuIdFlipVertical },
 ]
 export const cropMenuPaths = [
-    {path: backPath, id: menuIdBack},
-    {path: donePath, id: menuIdDone},
+    { path: backPath, id: menuIdCropBack },
+    { path: donePath, id: menuIdDone },
 ]
 export const pinpMenuPaths = [
-    {path: backPath, id: menuIdBack},
-    {path: pinpLeftTopPath, id: menuIdPinpLeftTop},
-    {path: pinpRightTopPath, id: menuIdPinpRightTop},
-    {path: pinpLeftBottomPath, id: menuIdPinpLeftBottom},
-    {path: pinpRightBottomPath, id: menuIdPinpRightBottom},
+    { path: backPath, id: menuIdPinpBack },
+    { path: pinpLeftTopPath, id: menuIdPinpLeftTop },
+    { path: pinpRightTopPath, id: menuIdPinpRightTop },
+    { path: pinpLeftBottomPath, id: menuIdPinpLeftBottom },
+    { path: pinpRightBottomPath, id: menuIdPinpRightBottom },
 ]
 
 export const anchorWidth = 12
@@ -242,7 +250,12 @@ export const anchorHeight = 12
 export const rotationAnchorWidth = 16
 export const rotationAnchorHeight = 16
 
-export const pinpScale = 1/4
+export const pinpScale = 1 / 4
+export const menuStateNone = 0
+export const menuStateLevel1 = 1
+export const menuStateLevel2Crop = 2
+export const menuStateLevel2Pinp = 3
+export const menuOffsetX = -36
 
 export interface Rect {
     id: string
