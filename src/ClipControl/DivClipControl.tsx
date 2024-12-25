@@ -113,7 +113,7 @@ export const DivClipControl = forwardRef<IDivClipControlRef, IDivClipControlProp
         const [canvasOffsetY, setCanvasOffsetY] = useState(0)
         const [keepRatio, setKeepRatio] = useState(true)
         const [showMenu, setShowMenu] = useState(true)
-        const [menuState, setMenuState] = useState(0)
+        const [menuState, setMenuState] = useState(menuStateLevel1)
         const [menuScreenX, setMenuScreenX] = useState(0)
         const [menuScreenY, setMenuScreenY] = useState(0)
 
@@ -467,13 +467,74 @@ export const DivClipControl = forwardRef<IDivClipControlRef, IDivClipControlProp
             }
         }
 
+        const getTransformAnchors = () => {
+            return (
+                <>
+                    <div className={CssModule.translateContainer}
+                         onMouseDown={event => onTranslateMouseDown(event)}
+                         onMouseMove={event => onTranslateMouseMove(event)}
+                         onMouseUp={event => onTranslateMouseUp(event)}
+                    ></div>
+                    <div className={CssModule.rotateAnchor}
+                         style={{
+                             transform: `scale(${1 / scaleX}, ${1 / scaleY})`
+                         }}
+                         onMouseDown={event => onRotateMouseDown(event)}
+                    ></div>
+                    <div className={CssModule.scaleLeftTop}
+                         style={{
+                             transform: `scale(${1 / scaleX}, ${1 / scaleY})`
+                         }}
+                         onMouseDown={event => onScaleMouseDown(event, 1)}
+                    >
+                    </div>
+                    <div className={CssModule.scaleLeftBottom}
+                         style={{
+                             transform: `scale(${1 / scaleX}, ${1 / scaleY})`
+                         }}
+                         onMouseDown={event => onScaleMouseDown(event, 2)}
+                    >
+                    </div>
+                    <div className={CssModule.scaleRightBottom}
+                         style={{
+                             transform: `scale(${1 / scaleX}, ${1 / scaleY})`
+                         }}
+                         onMouseDown={event => onScaleMouseDown(event, 3)}
+                    >
+                    </div>
+                    <div className={CssModule.scaleRightTop}
+                         style={{
+                             transform: `scale(${1 / scaleX}, ${1 / scaleY})`
+                         }}
+                         onMouseDown={event => onScaleMouseDown(event, 4)}
+                    >
+                    </div>
+                </>
+            )
+        }
+
+        const getCropAnchors = () => {
+            return (
+                <>
+                    <div className={CssModule.leftTopCrop}></div>
+                    <div className={CssModule.leftBottomCrop}></div>
+                    <div className={CssModule.rightBottomCrop}></div>
+                    <div className={CssModule.rightTopCrop}></div>
+                    <div className={CssModule.leftCenterCrop}></div>
+                    <div className={CssModule.bottomCenterCrop}></div>
+                    <div className={CssModule.rightCenterCrop}></div>
+                    <div className={CssModule.topCenterCrop}></div>
+                </>
+            )
+        }
+
         return (
             <>
                 <div className={CssModule.container}
                      onMouseMove={event => onMouseMove(event)}
                      onMouseUp={event => onMouseUp(event)}
                 >
-                    {/*{showMenu ? getMenu() : null}*/}
+                    {showMenu ? getMenu() : null}
                     <div style={{
                         transform: `translate(${transX}px, ${transY}px) scale(${scaleX}, ${scaleY}) rotate(${-rotation}deg)`,
                         width: width + "px",
@@ -483,47 +544,10 @@ export const DivClipControl = forwardRef<IDivClipControlRef, IDivClipControlProp
                         top: screenY + "px",
                         border: "1px solid yellow",
                         cursor: "move",
-                        background: "#80008080",
+                        background: `${menuState == menuStateLevel2Crop ? "#ff00ff50" : "#80008080"}`,
                     }}>
-                        <div className={CssModule.translateContainer}
-                             onMouseDown={event => onTranslateMouseDown(event)}
-                             onMouseMove={event => onTranslateMouseMove(event)}
-                             onMouseUp={event => onTranslateMouseUp(event)}
-                        ></div>
-                        <div className={CssModule.rotateAnchor}
-                             style={{
-                                 transform:`scale(${1/scaleX}, ${1/scaleY})`
-                             }}
-                             onMouseDown={event => onRotateMouseDown(event)}
-                        ></div>
-                        <div className={CssModule.scaleLeftTop}
-                             style={{
-                                 transform:`scale(${1/scaleX}, ${1/scaleY})`
-                             }}
-                             onMouseDown={event => onScaleMouseDown(event, 1)}
-                        >
-                        </div>
-                        <div className={CssModule.scaleLeftBottom}
-                             style={{
-                                 transform:`scale(${1/scaleX}, ${1/scaleY})`
-                             }}
-                             onMouseDown={event => onScaleMouseDown(event, 2)}
-                        >
-                        </div>
-                        <div className={CssModule.scaleRightBottom}
-                             style={{
-                                 transform:`scale(${1/scaleX}, ${1/scaleY})`
-                             }}
-                             onMouseDown={event => onScaleMouseDown(event, 3)}
-                        >
-                        </div>
-                        <div className={CssModule.scaleRightTop}
-                             style={{
-                                 transform:`scale(${1/scaleX}, ${1/scaleY})`
-                             }}
-                             onMouseDown={event => onScaleMouseDown(event, 4)}
-                        >
-                        </div>
+                        {menuState == menuStateLevel1 ? getTransformAnchors() : null}
+                        {menuState == menuStateLevel2Crop ? getCropAnchors() : null}
                     </div>
                 </div>
             </>

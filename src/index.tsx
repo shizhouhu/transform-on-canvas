@@ -9,7 +9,7 @@ import App from "./App";
 let rootElement = document.getElementById('root') as HTMLElement
 rootElement.style.width = "100%"
 rootElement.style.height = "1080px"
-rootElement.style.background = "#B5F1CC"
+rootElement.style.background = "#000000"
 
 const root = ReactDOM.createRoot(
     rootElement

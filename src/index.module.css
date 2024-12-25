@@ -5,11 +5,15 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    background-color: #25262b;
+}
+.leftPane {
+    background-color: #181818;
 }
 
 .canvas1 {
     border: solid 1px black;
-    background-color: #00ff0050;
+    background-color: black;
     padding: 0;
     margin: 0;
     border: 0;
@@ -64,5 +68,5 @@
     display: block;
     width: 640px;
     height: 360px;
-    background-color: #00ff0050;
+    background-color: black;
 }

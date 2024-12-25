@@ -110,7 +110,7 @@ const App = () => {
     return (
         <>
             <Allotment defaultSizes={[window.screen.width * 0.22, window.screen.width]}>
-                <Allotment.Pane className="Pane" minSize={200}>
+                <Allotment.Pane className={CssModule.leftPane} minSize={200}>
                 </Allotment.Pane>
                 <Allotment.Pane className="Pane">
                     <Allotment defaultSizes={[60, 600, window.screen.height - 660]} vertical>
