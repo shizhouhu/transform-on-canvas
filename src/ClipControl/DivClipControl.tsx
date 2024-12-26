@@ -359,46 +359,198 @@ export const DivClipControl = forwardRef<IDivClipControlRef, IDivClipControlProp
             }
         }
 
+        const onLeftTopCropAnchorMouseMove = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+            movementX = e.clientX - cropStartScreenX
+            movementY = e.clientY - cropStartScreenY
+            let trimmedWidth = getTrimmedWidth(movementX, movementY)
+            let trimmedHeight = getTrimmedHeight(movementX, movementY)
+            let newWidth = cropStartWidth - trimmedWidth
+            let newHeight = cropStartHeight - trimmedHeight
+            if (newWidth > 0) {
+                if (newWidth <= width) {
+                    setCropWidth(newWidth)
+                    setCropScreenX(originCropScreenX + movementX)
+                } else {
+                    setCropWidth(width)
+                    setCropScreenX(originCropScreenX)
+                }
+            }
+            if (newHeight > 0) {
+                if (newHeight <= height) {
+                    setCropHeight(newHeight)
+                    setCropScreenY(originCropScreenY + movementY)
+                } else {
+                    setCropHeight(height)
+                    setCropScreenY(originCropScreenY)
+                }
+            }
+        }
+
+        const onLeftBottomCropAnchorMouseMove = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+            movementX = e.clientX - cropStartScreenX
+            movementY = e.clientY - cropStartScreenY
+            let trimmedWidth = getTrimmedWidth(movementX, movementY)
+            let trimmedHeight = getTrimmedHeight(movementX, movementY)
+            let newWidth = cropStartWidth - trimmedWidth
+            let newHeight = cropStartHeight + trimmedHeight
+            if (newWidth > 0) {
+                if (newWidth <= width) {
+                    setCropWidth(newWidth)
+                    setCropScreenX(originCropScreenX + movementX)
+                } else {
+                    setCropWidth(width)
+                    setCropScreenX(originCropScreenX)
+                }
+            }
+            if (newHeight > 0) {
+                if (newHeight <= height) {
+                    setCropHeight(newHeight)
+                    setCropScreenY(originCropScreenY)
+                } else {
+                    setCropHeight(height)
+                    setCropScreenY(originCropScreenY)
+                }
+            }
+        }
+
+        const onRightBottomCropAnchorMouseMove = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+            movementX = e.clientX - cropStartScreenX
+            movementY = e.clientY - cropStartScreenY
+            let trimmedWidth = getTrimmedWidth(movementX, movementY)
+            let trimmedHeight = getTrimmedHeight(movementX, movementY)
+            let newWidth = cropStartWidth + trimmedWidth
+            let newHeight = cropStartHeight + trimmedHeight
+            if (newWidth > 0) {
+                if (newWidth <= width) {
+                    setCropWidth(newWidth)
+                    setCropScreenX(originCropScreenX)
+                } else {
+                    setCropWidth(width)
+                    setCropScreenX(originCropScreenX)
+                }
+            }
+            if (newHeight > 0) {
+                if (newHeight <= height) {
+                    setCropHeight(newHeight)
+                    setCropScreenY(originCropScreenY)
+                } else {
+                    setCropHeight(height)
+                    setCropScreenY(originCropScreenY)
+                }
+            }
+        }
+
+        const onRightTopCropAnchorMouseMove = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+            movementX = e.clientX - cropStartScreenX
+            movementY = e.clientY - cropStartScreenY
+            let trimmedWidth = getTrimmedWidth(movementX, movementY)
+            let trimmedHeight = getTrimmedHeight(movementX, movementY)
+            let newWidth = cropStartWidth + trimmedWidth
+            let newHeight = cropStartHeight - trimmedHeight
+            if (newWidth > 0) {
+                if (newWidth <= width) {
+                    setCropWidth(newWidth)
+                    setCropScreenX(originCropScreenX)
+                } else {
+                    setCropWidth(width)
+                    setCropScreenX(originCropScreenX)
+                }
+            }
+            if (newHeight > 0) {
+                if (newHeight <= height) {
+                    setCropHeight(newHeight)
+                    setCropScreenY(originCropScreenY + movementY)
+                } else {
+                    setCropHeight(height)
+                    setCropScreenY(originCropScreenY)
+                }
+            }
+        }
+
+        const onLeftCenterCropAnchorMouseMove = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+            movementX = e.clientX - cropStartScreenX
+            movementY = e.clientY - cropStartScreenY
+            let trimmedWidth = getTrimmedWidth(movementX, movementY)
+            let newWidth = cropStartWidth - trimmedWidth
+            if (newWidth > 0) {
+                if (newWidth <= width) {
+                    setCropWidth(newWidth)
+                    setCropScreenX(originCropScreenX + movementX)
+                } else {
+                    setCropWidth(width)
+                    setCropScreenX(originCropScreenX)
+                }
+            }
+        }
+
+        const onBottomCenterCropAnchorMouseMove = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+            movementX = e.clientX - cropStartScreenX
+            movementY = e.clientY - cropStartScreenY
+
+            let trimmedHeight = getTrimmedHeight(movementX, movementY)
+            let newHeight = cropStartHeight + trimmedHeight
+            if (newHeight > 0) {
+                if (newHeight <= height) {
+                    setCropHeight(newHeight)
+                    setCropScreenY(originCropScreenY + movementY)
+                } else {
+                    setCropHeight(height)
+                    setCropScreenY(originCropScreenY)
+                }
+            }
+        }
+
+        const onRightCenterCropAnchorMouseMove = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+            movementX = e.clientX - cropStartScreenX
+            movementY = e.clientY - cropStartScreenY
+
+            let trimmedWidth = getTrimmedWidth(movementX, movementY)
+            let newWidth = cropStartWidth + trimmedWidth
+            if (newWidth > 0) {
+                if (newWidth <= width) {
+                    setCropWidth(newWidth)
+                    setCropScreenX(originCropScreenX)
+                } else {
+                    setCropWidth(width)
+                    setCropScreenX(originCropScreenX)
+                }
+            }
+        }
+
+        const onTopCenterCropAnchorMouseMove = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+            movementX = e.clientX - cropStartScreenX
+            movementY = e.clientY - cropStartScreenY
+
+            let trimmedHeight = getTrimmedHeight(movementX, movementY)
+            let newHeight = cropStartHeight - trimmedHeight
+            if (newHeight > 0) {
+                if (newHeight <= height) {
+                    setCropHeight(newHeight)
+                    setCropScreenY(originCropScreenY + movementY)
+                } else {
+                    setCropHeight(height)
+                    setCropScreenY(originCropScreenY)
+                }
+            }
+        }
+
         const onCropAnchorMouseMove = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
             if (cropAnchor == 1) {
-                movementX = e.clientX - cropStartScreenX
-                movementY = e.clientY - cropStartScreenY
-                let trimmedWidth = getTrimmedWidth(movementX, movementY)
-                let trimmedHeight = getTrimmedHeight(movementX, movementY)
-                let newWidth = cropStartWidth - trimmedWidth
-                let newHeight = cropStartHeight - trimmedHeight
-                if (newWidth > 0) {
-                    if (newWidth <= width) {
-                        setCropWidth(newWidth)
-                        setCropScreenX(originCropScreenX + movementX)
-                    } else {
-                        setCropWidth(width)
-                        setCropScreenX(originCropScreenX)
-                    }
-                }
-                if (newHeight > 0) {
-                    if (newHeight <= height) {
-                        setCropHeight(newHeight)
-                        setCropScreenY(originCropScreenY + movementY)
-                    } else {
-                        setCropHeight(height)
-                        setCropScreenY(originCropScreenY)
-                    }
-                }
+                onLeftTopCropAnchorMouseMove(e)
             } else if (cropAnchor == 2) {
-
+                onLeftBottomCropAnchorMouseMove(e)
             } else if (cropAnchor == 3) {
-
+                onRightBottomCropAnchorMouseMove(e)
             } else if (cropAnchor == 4) {
-
+                onRightTopCropAnchorMouseMove(e)
             } else if (cropAnchor == 5) {
-
+                onLeftCenterCropAnchorMouseMove(e)
             } else if (cropAnchor == 6) {
-
+                onBottomCenterCropAnchorMouseMove(e)
             } else if (cropAnchor == 7) {
-
+                onRightCenterCropAnchorMouseMove(e)
             } else if (cropAnchor == 8) {
-
+                onTopCenterCropAnchorMouseMove(e)
             }
         }
 
@@ -484,13 +636,11 @@ export const DivClipControl = forwardRef<IDivClipControlRef, IDivClipControlProp
                 y,
                 transform,
             )
-            console.log('------------', x, y, point1)
             setMenuScreenX(Math.round(point1.get(0, 0)) + menuOffsetX)
             setMenuScreenY(Math.round(point1.get(1, 0)))
         }
 
         useEffect(() => {
-            console.log('------------ menuScreenX menuScreenY', menuScreenX, menuScreenY)
         }, [menuScreenX, menuScreenY]);
 
         const editPanel = useAppSelector(
