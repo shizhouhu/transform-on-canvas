@@ -16,12 +16,12 @@
 .rotateAnchor {
     cursor: pointer;
     position: absolute;
-    top: -50px;
-    left: calc(50% - 15px);
-    width: 30px;
-    height: 30px;
+    top: -40px;
+    left: calc(50% - 10px);
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
-    background-color: peachpuff;
+    background-color: #61dafb;
 }
 .scaleLeftTop {
     cursor: pointer;
@@ -145,4 +145,17 @@
     width: 15px;
     height: 15px;
     background-color: #ffffff;
+}
+.menu {
+    width: 28px;
+    border-radius: 4px;
+    background-color: #292929;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    position: absolute;
+    z-index: 10000;
 }

@@ -3,14 +3,24 @@ import {
     coordinateMapCartesianToScreen,
     coordinateMapScreenToCartesian,
     getHomogeneousTranslationMatrix,
-    TransformData
+    TransformData, transformPointAndMapToScreen
 } from "./Math";
 import {RegionData} from "./ClipControl";
 import CssModule from './DivClipControl.module.css'
 import {
     calcAngleDegrees,
-    menuIdCrop, menuIdCropBack, menuIdDone, menuIdFlipHorizontal, menuIdFlipVertical,
-    menuIdPinp, menuIdPinpBack, menuIdPinpLeftBottom, menuIdPinpLeftTop, menuIdPinpRightBottom, menuIdPinpRightTop,
+    menuIdCrop,
+    menuIdCropBack,
+    menuIdDone,
+    menuIdFlipHorizontal,
+    menuIdFlipVertical,
+    menuIdPinp,
+    menuIdPinpBack,
+    menuIdPinpLeftBottom,
+    menuIdPinpLeftTop,
+    menuIdPinpRightBottom,
+    menuIdPinpRightTop,
+    menuOffsetX,
     menuStateLevel1,
     menuStateLevel2Crop,
     menuStateLevel2Pinp,
@@ -30,6 +40,7 @@ import { ReactComponent as PinpLeftBottomSvg } from '@/assets/svg/clipControl/pi
 import { ReactComponent as PinpLeftTopSvg } from '@/assets/svg/clipControl/pinp_left_top.svg'
 import { ReactComponent as PinpRightBottomSvg } from '@/assets/svg/clipControl/pinp_right_bottom.svg'
 import { ReactComponent as PinpRightTopSvg } from '@/assets/svg/clipControl/pinp_right_top.svg'
+import {useAppSelector} from "@/store/hooks";
 
 const BootstrapTooltip = styled(({ className, ...props }: TooltipProps) => (
     <Tooltip {...props} arrow classes={{ popper: className }} />
@@ -70,7 +81,9 @@ let movementY = 0
 let translating = false
 let rotating = false
 let scaling = false
+let cropping = false
 let scaleAnchor = 0
+let cropAnchor = 0
 let originTransX = 0
 let originTransY = 0
 let originRotation = 0
@@ -79,6 +92,13 @@ let originScaleX = 1
 let originScaleY = 1
 let hypotenuse = 0
 let newHypotenuse = 0
+let cropStartScreenX = 0
+let cropStartScreenY = 0
+let cropStartWidth = 0
+let cropStartHeight = 0
+let originCropScreenX = 0
+let originCropScreenY = 0
+
 export interface IDivClipControlRef {
     updateCanvasInfo: (
         canvasWidth: number,
@@ -112,10 +132,22 @@ export const DivClipControl = forwardRef<IDivClipControlRef, IDivClipControlProp
         const [canvasOffsetX, setCanvasOffsetX] = useState(0)
         const [canvasOffsetY, setCanvasOffsetY] = useState(0)
         const [keepRatio, setKeepRatio] = useState(true)
-        const [showMenu, setShowMenu] = useState(true)
-        const [menuState, setMenuState] = useState(menuStateLevel1)
+        const [showMenu, setShowMenu] = useState(false)
+        const [menuState, setMenuState] = useState(0)
         const [menuScreenX, setMenuScreenX] = useState(0)
         const [menuScreenY, setMenuScreenY] = useState(0)
+
+        const [cropX, setCropX] = useState(0)
+        const [cropY, setCropY] = useState(0)
+        const [cropWidth, setCropWidth] = useState(0)
+        const [cropHeight, setCropHeight] = useState(0)
+        const [cropRotation, setCropRotation] = useState(0)
+        const [cropScaleX, setCropScaleX] = useState(0)
+        const [cropScaleY, setCropScaleY] = useState(0)
+        const [cropTransX, setCropTransX] = useState(0)
+        const [cropTransY, setCropTransY] = useState(0)
+        const [cropScreenX, setCropScreenX] = useState(0)
+        const [cropScreenY, setCropScreenY] = useState(0)
 
         useEffect(() => {
             setX(props.x)
@@ -130,6 +162,25 @@ export const DivClipControl = forwardRef<IDivClipControlRef, IDivClipControlProp
             setLiveWindowWidth(props.liveWindowWidth)
             setLiveWindowHeight(props.liveWindowHeight)
         }, []);
+        useEffect(() => {
+            setCropX(x)
+            setCropY(y)
+            setCropWidth(width)
+            setCropHeight(height)
+        }, [x, y, width, height])
+        useEffect(() => {
+            setCropRotation(rotation)
+            setCropTransX(transX)
+            setCropTransY(transY)
+            setCropScaleX(scaleX)
+            setCropScaleY(scaleY)
+        }, [rotation, transX, transY, scaleX, scaleY]);
+
+        useEffect(() => {
+            let point = coordinateMapCartesianToScreen(canvasWidth, canvasHeight, cropX, cropY)
+            setCropScreenX(point.get(0, 0))
+            setCropScreenY(point.get(1, 0))
+        }, [cropX, cropY]);
 
         useEffect(() => {
             let point = coordinateMapCartesianToScreen(canvasWidth, canvasHeight, x, y)
@@ -237,76 +288,129 @@ export const DivClipControl = forwardRef<IDivClipControlRef, IDivClipControlProp
                 )
             return trimmedHeight
         }
+        const onRotateAnchorMouseMove = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+            const mousePos = {
+                x: e.clientX - canvasOffsetX,
+                y: e.clientY - canvasOffsetY,
+            }
+            let point = coordinateMapScreenToCartesian(
+                canvasWidth,
+                canvasHeight,
+                mousePos.x,
+                mousePos.y,
+            )
+            let transM = getHomogeneousTranslationMatrix(-transX, -transY)
+            point = transM.mmul(
+                new Matrix([[point.get(0, 0)], [point.get(1, 0)], [1]]),
+            )
+
+            let angle = calcAngleDegrees(point.get(0, 0), point.get(1, 0))
+            let tempRotation = angle - originAngle
+            setRotation(originRotation + tempRotation)
+            e.stopPropagation()
+        }
+
+        const onScaleAnchorMouseMove = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+            movementX = e.clientX - scaleStartScreenX
+            movementY = e.clientY - scaleStartScreenY
+
+            let trimmedWidth = getTrimmedWidth(movementX, movementY)
+            let trimmedHeight = getTrimmedHeight(movementX, movementY)
+            let originWidth = width * originScaleX
+            let originHeight = height * originScaleY
+            let scaleX = 1
+            let scaleY = 1
+            if (scaleAnchor == 1) {
+                scaleX = (originWidth - 2 * trimmedWidth) / originWidth
+                scaleY = (originHeight - 2 * trimmedHeight) / originHeight
+                newHypotenuse = Math.sqrt(
+                    Math.pow(originWidth - 2 * trimmedWidth, 2) +
+                    Math.pow(originHeight - 2 * trimmedHeight, 2),
+                )
+            } else if (scaleAnchor == 2) {
+                scaleX = (originWidth - 2 * trimmedWidth) / originWidth
+                scaleY = (originHeight + 2 * trimmedHeight) / originHeight
+                newHypotenuse = Math.sqrt(
+                    Math.pow(originWidth - 2 * trimmedWidth, 2) +
+                    Math.pow(originHeight + 2 * trimmedHeight, 2),
+                )
+            } else if (scaleAnchor == 3) {
+                scaleX = (originWidth + 2 * trimmedWidth) / originWidth
+                scaleY = (originHeight + 2 * trimmedHeight) / originHeight
+                newHypotenuse = Math.sqrt(
+                    Math.pow(originWidth + 2 * trimmedWidth, 2) +
+                    Math.pow(originHeight + 2 * trimmedHeight, 2),
+                )
+            } else if (scaleAnchor == 4) {
+                scaleX = (originWidth + 2 * trimmedWidth) / originWidth
+                scaleY = (originHeight - 2 * trimmedHeight) / originHeight
+                newHypotenuse = Math.sqrt(
+                    Math.pow(originWidth + 2 * trimmedWidth, 2) +
+                    Math.pow(originHeight - 2 * trimmedHeight, 2),
+                )
+            }
+
+            if (keepRatio) {
+                setScaleX(originScaleX * (newHypotenuse / hypotenuse))
+                setScaleY(originScaleY * (newHypotenuse / hypotenuse))
+            } else {
+                setScaleX(originScaleX * scaleX)
+                setScaleY(originScaleY * scaleY)
+            }
+        }
+
+        const onCropAnchorMouseMove = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+            if (cropAnchor == 1) {
+                movementX = e.clientX - cropStartScreenX
+                movementY = e.clientY - cropStartScreenY
+                let trimmedWidth = getTrimmedWidth(movementX, movementY)
+                let trimmedHeight = getTrimmedHeight(movementX, movementY)
+                let newWidth = cropStartWidth - trimmedWidth
+                let newHeight = cropStartHeight - trimmedHeight
+                if (newWidth > 0) {
+                    if (newWidth <= width) {
+                        setCropWidth(newWidth)
+                        setCropScreenX(originCropScreenX + movementX)
+                    } else {
+                        setCropWidth(width)
+                        setCropScreenX(originCropScreenX)
+                    }
+                }
+                if (newHeight > 0) {
+                    if (newHeight <= height) {
+                        setCropHeight(newHeight)
+                        setCropScreenY(originCropScreenY + movementY)
+                    } else {
+                        setCropHeight(height)
+                        setCropScreenY(originCropScreenY)
+                    }
+                }
+            } else if (cropAnchor == 2) {
+
+            } else if (cropAnchor == 3) {
+
+            } else if (cropAnchor == 4) {
+
+            } else if (cropAnchor == 5) {
+
+            } else if (cropAnchor == 6) {
+
+            } else if (cropAnchor == 7) {
+
+            } else if (cropAnchor == 8) {
+
+            }
+        }
 
         const onMouseMove = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
             if (rotating) {
-                const mousePos = {
-                    x: e.clientX - canvasOffsetX,
-                    y: e.clientY - canvasOffsetY,
-                }
-                let point = coordinateMapScreenToCartesian(
-                    canvasWidth,
-                    canvasHeight,
-                    mousePos.x,
-                    mousePos.y,
-                )
-                let transM = getHomogeneousTranslationMatrix(-transX, -transY)
-                point = transM.mmul(
-                    new Matrix([[point.get(0, 0)], [point.get(1, 0)], [1]]),
-                )
-
-                let angle = calcAngleDegrees(point.get(0, 0), point.get(1, 0))
-                let tempRotation = angle - originAngle
-                setRotation(originRotation + tempRotation)
-                e.stopPropagation()
+                onRotateAnchorMouseMove(e)
             }
             if (scaling) {
-                movementX = e.clientX - scaleStartScreenX
-                movementY = e.clientY - scaleStartScreenY
-
-                let trimmedWidth = getTrimmedWidth(movementX, movementY)
-                let trimmedHeight = getTrimmedHeight(movementX, movementY)
-                let originWidth = width * originScaleX
-                let originHeight = height * originScaleY
-                let scaleX = 1
-                let scaleY = 1
-                if (scaleAnchor == 1) {
-                    scaleX = (originWidth - 2 * trimmedWidth) / originWidth
-                    scaleY = (originHeight - 2 * trimmedHeight) / originHeight
-                    newHypotenuse = Math.sqrt(
-                        Math.pow(originWidth - 2 * trimmedWidth, 2) +
-                        Math.pow(originHeight - 2 * trimmedHeight, 2),
-                    )
-                } else if (scaleAnchor == 2) {
-                    scaleX = (originWidth - 2 * trimmedWidth) / originWidth
-                    scaleY = (originHeight + 2 * trimmedHeight) / originHeight
-                    newHypotenuse = Math.sqrt(
-                        Math.pow(originWidth - 2 * trimmedWidth, 2) +
-                        Math.pow(originHeight + 2 * trimmedHeight, 2),
-                    )
-                } else if (scaleAnchor == 3) {
-                    scaleX = (originWidth + 2 * trimmedWidth) / originWidth
-                    scaleY = (originHeight + 2 * trimmedHeight) / originHeight
-                    newHypotenuse = Math.sqrt(
-                        Math.pow(originWidth + 2 * trimmedWidth, 2) +
-                        Math.pow(originHeight + 2 * trimmedHeight, 2),
-                    )
-                } else if (scaleAnchor == 4) {
-                    scaleX = (originWidth + 2 * trimmedWidth) / originWidth
-                    scaleY = (originHeight - 2 * trimmedHeight) / originHeight
-                    newHypotenuse = Math.sqrt(
-                        Math.pow(originWidth + 2 * trimmedWidth, 2) +
-                        Math.pow(originHeight - 2 * trimmedHeight, 2),
-                    )
-                }
-
-                if (keepRatio) {
-                    setScaleX(originScaleX * (newHypotenuse / hypotenuse))
-                    setScaleY(originScaleY * (newHypotenuse / hypotenuse))
-                } else {
-                    setScaleX(originScaleX * scaleX)
-                    setScaleY(originScaleY * scaleY)
-                }
+                onScaleAnchorMouseMove(e)
+            }
+            if (cropping) {
+                onCropAnchorMouseMove(e)
             }
         }
 
@@ -317,6 +421,10 @@ export const DivClipControl = forwardRef<IDivClipControlRef, IDivClipControlProp
             }
             if (scaling) {
                 scaling = false
+                e.stopPropagation()
+            }
+            if (cropping) {
+                cropping = false
                 e.stopPropagation()
             }
         }
@@ -333,6 +441,74 @@ export const DivClipControl = forwardRef<IDivClipControlRef, IDivClipControlProp
                 Math.pow(height * originScaleY, 2),
             )
         }
+
+        const onCropMouseDown = (e: React.MouseEvent<HTMLDivElement, MouseEvent>, anchorIndex: number) => {
+            cropping = true
+            cropAnchor = anchorIndex
+            cropStartScreenX = e.clientX
+            cropStartScreenY = e.clientY
+            cropStartWidth = cropWidth
+            cropStartHeight = cropHeight
+            originCropScreenX = cropScreenX
+            originCropScreenY = cropScreenY
+        }
+
+        const getTransform = (
+            rotation: number,
+            scaleX: number,
+            scaleY: number,
+            transX: number,
+            transY: number,
+        ) => {
+            let transform: TransformData = {
+                rotation: rotation,
+                scaleX: scaleX,
+                scaleY: scaleY,
+                transX: transX,
+                transY: transY,
+            }
+            return transform
+        }
+        const updateMenuPosition = () => {
+            let transform = getTransform(
+                rotation,
+                Math.abs(scaleX),
+                Math.abs(scaleY),
+                transX,
+                transY,
+            )
+            let point1 = transformPointAndMapToScreen(
+                canvasWidth,
+                canvasHeight,
+                x,
+                y,
+                transform,
+            )
+            console.log('------------', x, y, point1)
+            setMenuScreenX(Math.round(point1.get(0, 0)) + menuOffsetX)
+            setMenuScreenY(Math.round(point1.get(1, 0)))
+        }
+
+        useEffect(() => {
+            console.log('------------ menuScreenX menuScreenY', menuScreenX, menuScreenY)
+        }, [menuScreenX, menuScreenY]);
+
+        const editPanel = useAppSelector(
+            state => state.editor.editPanel,
+        )
+
+        useEffect(() => {
+            if (editPanel == 'video') {
+                setShowMenu(true)
+            } else {
+                setShowMenu(false)
+            }
+        }, [editPanel])
+
+        useEffect(() => {
+            setMenuState(menuStateLevel1)
+            updateMenuPosition()
+        }, [showMenu]);
 
         const onMenuClicked = (menuId: string) => {
             if (menuId == menuIdCrop) {
@@ -516,14 +692,30 @@ export const DivClipControl = forwardRef<IDivClipControlRef, IDivClipControlProp
         const getCropAnchors = () => {
             return (
                 <>
-                    <div className={CssModule.leftTopCrop}></div>
-                    <div className={CssModule.leftBottomCrop}></div>
-                    <div className={CssModule.rightBottomCrop}></div>
-                    <div className={CssModule.rightTopCrop}></div>
-                    <div className={CssModule.leftCenterCrop}></div>
-                    <div className={CssModule.bottomCenterCrop}></div>
-                    <div className={CssModule.rightCenterCrop}></div>
-                    <div className={CssModule.topCenterCrop}></div>
+                    <div className={CssModule.leftTopCrop}
+                         onMouseDown={event => onCropMouseDown(event, 1)}
+                    ></div>
+                    <div className={CssModule.leftBottomCrop}
+                         onMouseDown={event => onCropMouseDown(event, 2)}
+                    ></div>
+                    <div className={CssModule.rightBottomCrop}
+                         onMouseDown={event => onCropMouseDown(event, 3)}
+                    ></div>
+                    <div className={CssModule.rightTopCrop}
+                         onMouseDown={event => onCropMouseDown(event, 4)}
+                    ></div>
+                    <div className={CssModule.leftCenterCrop}
+                         onMouseDown={event => onCropMouseDown(event, 5)}
+                    ></div>
+                    <div className={CssModule.bottomCenterCrop}
+                         onMouseDown={event => onCropMouseDown(event, 6)}
+                    ></div>
+                    <div className={CssModule.rightCenterCrop}
+                         onMouseDown={event => onCropMouseDown(event, 7)}
+                    ></div>
+                    <div className={CssModule.topCenterCrop}
+                         onMouseDown={event => onCropMouseDown(event, 8)}
+                    ></div>
                 </>
             )
         }
@@ -535,20 +727,40 @@ export const DivClipControl = forwardRef<IDivClipControlRef, IDivClipControlProp
                      onMouseUp={event => onMouseUp(event)}
                 >
                     {showMenu ? getMenu() : null}
-                    <div style={{
-                        transform: `translate(${transX}px, ${transY}px) scale(${scaleX}, ${scaleY}) rotate(${-rotation}deg)`,
-                        width: width + "px",
-                        height: height + "px",
-                        position: "absolute",
-                        left: screenX + "px",
-                        top: screenY + "px",
-                        border: "1px solid yellow",
-                        cursor: "move",
-                        background: `${menuState == menuStateLevel2Crop ? "#ff00ff50" : "#80008080"}`,
-                    }}>
-                        {menuState == menuStateLevel1 ? getTransformAnchors() : null}
-                        {menuState == menuStateLevel2Crop ? getCropAnchors() : null}
-                    </div>
+                    {
+                        editPanel.length > 0 ? (
+                            <div style={{
+                                transform: `translate(${transX}px, ${transY}px) scale(${scaleX}, ${scaleY}) rotate(${-rotation}deg)`,
+                                width: width + "px",
+                                height: height + "px",
+                                position: "absolute",
+                                left: screenX + "px",
+                                top: screenY + "px",
+                                border: "1px solid yellow",
+                                cursor: "move",
+                                background: "#80008080",
+                            }}>
+                                {getTransformAnchors()}
+                            </div>
+                        ) : null
+                    }
+                    {
+                        editPanel.length > 0 && menuState == menuStateLevel2Crop ? (
+                            <div style={{
+                                transform: `translate(${cropTransX}px, ${cropTransY}px) scale(${cropScaleX}, ${cropScaleY}) rotate(${-cropRotation}deg)`,
+                                width: cropWidth + "px",
+                                height: cropHeight + "px",
+                                position: "absolute",
+                                left: cropScreenX + "px",
+                                top: cropScreenY + "px",
+                                border: "1px solid yellow",
+                                cursor: "move",
+                                background: "#ff00ff50",
+                            }}>
+                                {getCropAnchors()}
+                            </div>
+                        ) : null
+                    }
                 </div>
             </>
         )

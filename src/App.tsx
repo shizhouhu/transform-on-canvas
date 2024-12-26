@@ -7,6 +7,7 @@ import "allotment/dist/style.css";
 import {useAppDispatch, useAppSelector} from "./store/hooks";
 import {editorActions} from "./store/editor";
 import {TransformData} from "./ClipControl/Math";
+import {Button} from "@mui/material";
 
 let width = 1280
 let height = 720
@@ -107,6 +108,19 @@ const App = () => {
         }
     }, [clipControlProps]);
 
+    let editPanel  = useAppSelector(
+        state => state.editor.editPanel,
+    )
+    const onSwitchClicked = () => {
+        if (editPanel.length == 0) {
+            editPanel = "video"
+        } else {
+            editPanel = ""
+        }
+        console.log("switch", editPanel)
+        dispatch(editorActions.updateEditPanel(editPanel))
+    }
+
     return (
         <>
             <Allotment defaultSizes={[window.screen.width * 0.22, window.screen.width]}>
@@ -157,6 +171,7 @@ const App = () => {
                             </div>
                         </Allotment.Pane>
                         <Allotment.Pane className="Pane" minSize={200}>
+                            <Button onClick={onSwitchClicked}>{"Switch"}</Button>
                         </Allotment.Pane>
                     </Allotment>
                 </Allotment.Pane>
